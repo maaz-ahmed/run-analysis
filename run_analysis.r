@@ -1,8 +1,5 @@
 library(dplyr)
 read.table_instructions <- list(
-  # The first object is a list with name 'file'
-  # that contains values for 'file' argument,
-  # which indicates the path of each file.
   file = list(
     activity_labels = "UCI HAR Dataset/activity_labels.txt",
     features = "UCI HAR Dataset/features.txt",
@@ -22,10 +19,7 @@ read.table_instructions <- list(
     y_test = "integer",
     X_test = rep("numeric", 561)
   ),
-  # The third object is a list with name 'nrows'
-  # that contains the values for 'nrows' argument
-  # that indicates the number of rows to read in each file.
-  # It is supplied for speed.
+
   nrows = list(
     activity_labels = 6,
     features = 561,
@@ -50,15 +44,10 @@ merged_data <- with(data_files,
 target_features_indexes <- grep("mean\\(\\)|std\\(\\)",
                                 data_files$features[[2]])
 
-target_variables_indexes <- c(1, 2, # the first two columns that refer to
-                              # 'subject' and 'activity'
-                              # should be included
-                              # adds 2 to correct the indexes
-                              # of target features indexes because of
-                              # the 2 extra columns we have included
+target_variables_indexes <- c(1, 2, 
                               target_features_indexes + 2)
 
-## Extracts the target variables to create the target data frame
+
 target_data <- merged_data[ , target_variables_indexes]
 
 
@@ -68,11 +57,11 @@ target_data[[2]] <- factor(target_data[[2]],
 
 descriptive_variable_names <- data_files$features[[2]][target_features_indexes]
 
-## Correct a typo
+
 descriptive_variable_names <- gsub(pattern = "BodyBody", replacement = "Body",
                                    descriptive_variable_names)
 
-## Create a tidy data set with appropriate labels for the variable names
+
 tidy_data <- target_data
 names(tidy_data) <- c("subject", "activity", descriptive_variable_names)
 
@@ -81,14 +70,10 @@ tidy_data_summary <- tidy_data %>%
   summarise_all(funs(mean)) %>%
   ungroup()
 
-## Replace the variable names of 'tidy_data_summary' with new descriptive ones.
-## Just the prefix "Avrg-" will be added in all variable names,
-## except the first two, 'subject' and 'activity'.
 new_names_for_summary <- c(names(tidy_data_summary[c(1,2)]),
                            paste0("Avrg-", names(tidy_data_summary[-c(1, 2)])))
 names(tidy_data_summary) <- new_names_for_summary
 
-## Save the data frame created as a text file in working directory
 write.table(tidy_data_summary, "tidy_data_summary.txt", row.names = FALSE)
                                                                
                                                                
